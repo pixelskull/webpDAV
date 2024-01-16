@@ -1,12 +1,58 @@
-# Project webpDAV
-
-One Paragraph of project description goes here
+# webpDAV
+webpDav is a simple webDAV server for converting images to WebP.
+This software creates a mountable WebDAV endpoint on your [home]server. Mounting webpDAV on your computer makes converting images (JPG and PNG) as easy as dragging them into the folder. webpDAV implements a file system watcher that checkes if a new image is placed into the share and automatically encodes the images to the WebP format using libwebp.
 
 ## Getting Started
+The following instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Using **docker** is the recommended installation, since the dependencie to libwebp is already handled within the Dockerfile. 
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+For those who want to build this project without docker please ensure to **install libwebp** on your system. 
 
-## MakeFile
+### Requirements 
+[lipwebp](https://developers.google.com/speed/webp/docs/api)
+
+#### Install libwebp
+For macOS use:
+```bash
+brew install webp
+```
+
+Linux users can use: 
+```bash
+sudo apt-get update 
+sudo apt-get install libwebp-dev
+```
+
+### Docker 
+
+Building the docker image within the source folder using the following command.
+
+```bash
+docker build -t "webpDAV:latest" . 
+```
+
+Then start the image using: 
+```bash
+docker run -p 8080:8080 webpDAV
+```
+
+Example docker-compose for easier start 
+```yaml
+version: "3.9"
+
+services: 
+  webpDAV: 
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: webpDAV
+    restart: unless-stopped
+    ports: 
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+```
+
+### MakeFile
 
 run all make commands with clean tests
 ```bash
