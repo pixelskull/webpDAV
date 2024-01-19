@@ -2,9 +2,14 @@ package file
 
 import (
 	"log"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
+
+var fileTimer map[string]*time.Timer = make(map[string]*time.Timer, 0)
+
+// var timerFunc *time.Timer := time.AfterFunc(1 * time.Seconds, func (value string, chan channel) { chan <- value })
 
 func SetupFileWatcher() {
 	dir := "./data"
@@ -47,7 +52,23 @@ func startFileWatcher(path string, fileChan chan<- string) {
 				}
 				if event.Has(fsnotify.Write) {
 					log.Println("File was modified: ", event.Name)
-					fileChan <- event.Name
+					// fileChan <- event.Name
+					if fileTimer[event.Name] == nil {
+						fileTimer[event.Name] = time.AfterFunc(
+							1*time.Second,
+							func() {
+								fileChan <- event.Name
+								delete(fileTimer, event.Name)
+								log.Printf(
+									"removed %s from fileTimer map: %v",
+									event.Name,
+									fileTimer,
+								)
+							},
+						)
+					} else { // reset the timer
+						fileTimer[event.Name].Reset(1 * time.Second)
+					}
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
